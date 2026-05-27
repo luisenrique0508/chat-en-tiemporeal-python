@@ -2,7 +2,7 @@
 
 ## ✅ PASO 1: Verificar Entorno Virtual
 
-```bash
+```sh
 # Si no existe el entorno virtual, créalo:
 python3 -m venv venv
 
@@ -17,16 +17,20 @@ pip install -r requirements.txt
 
 ## ✅ PASO 2: Probar Localmente
 
-```bash
+```sh
 # Asegúrate de que el archivo .env tiene tus credenciales correctas
 python chattelegram.py
+```
+
+```text
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/private/var/folders/pm/6l_47zk12nz8565n0y1jctcw0000gn/T/mdlab/chattelegram.py': [Errno 2] No such file or directory
 ```
 
 Abre tu navegador en `http://localhost:5000` y verifica que funciona.
 
 ## ✅ PASO 3: Subir a GitHub
 
-```bash
+```sh
 # Ver archivos preparados
 git status
 

@@ -1,6 +1,6 @@
-# 🎯 RESUMEN: Chat en Tiempo Real - Listo para Deploy
+#  RESUMEN: Chat en Tiempo Real - Listo para Deploy
 
-## ✅ Archivos Creados
+##  Archivos Creados
 
 ```
 chatrealtime/
@@ -18,11 +18,11 @@ chatrealtime/
 └── venv/                   # Entorno virtual (NO se sube a Git)
 ```
 
-## 🚀 PRÓXIMOS PASOS
+##  PRÓXIMOS PASOS
 
-### 1️⃣ INSTALAR Y PROBAR LOCALMENTE
+### INSTALAR Y PROBAR LOCALMENTE
 
-```bash
+```sh
 # Opción A: Usar el script automático
 ./setup.sh
 
@@ -33,9 +33,9 @@ python test_config.py
 python chattelegram.py
 ```
 
-### 2️⃣ SUBIR A GITHUB
+###  SUBIR A GITHUB
 
-```bash
+```sh
 # Hacer commit de los archivos
 git add .
 git commit -m "Initial commit: Chat en tiempo real con Telegram"
@@ -45,7 +45,7 @@ git remote add origin https://github.com/TU_USUARIO/TU_REPO.git
 git push -u origin main
 ```
 
-### 3️⃣ DEPLOY EN RENDER
+### 3️ DEPLOY EN RENDER
 
 1. Ir a https://render.com
 2. Crear nuevo Web Service
@@ -56,31 +56,31 @@ git push -u origin main
    - `TELEGRAM_CHAT_ID`
 6. Deploy automático
 
-## 🔑 Cambios Importantes Realizados
+##  Cambios Importantes Realizados
 
-### ✅ Seguridad
-- ❌ Token y Chat ID hardcodeados en el código
-- ✅ Variables de entorno con `.env`
-- ✅ `.gitignore` para proteger credenciales
+###  Seguridad
+- Token y Chat ID hardcodeados en el código
+-  Variables de entorno con `.env`
+-  `.gitignore` para proteger credenciales
 
-### ✅ Configuración
-- ✅ Puerto y host configurables
-- ✅ Carga automática de variables de entorno
-- ✅ Compatibilidad con Render
+###  Configuración
+-  Puerto y host configurables
+-  Carga automática de variables de entorno
+-  Compatibilidad con Render
 
-### ✅ Docker
-- ✅ Dockerfile optimizado
-- ✅ Imagen ligera con Python 3.11
-- ✅ Listo para deploy en Render
+###  Docker
+-  Dockerfile optimizado
+-  Imagen ligera con Python 3.11
+-  Listo para deploy en Render
 
-### ✅ Documentación
-- ✅ README completo
-- ✅ Guía de deploy paso a paso
-- ✅ Scripts de ayuda
+###  Documentación
+-  README completo
+-  Guía de deploy paso a paso
+- Scripts de ayuda
 
-## 📝 Comandos Rápidos
+##  Comandos Rápidos
 
-```bash
+```sh
 # Activar entorno virtual
 source venv/bin/activate
 
@@ -100,25 +100,25 @@ docker build -t chat-realtime .
 docker run -p 5000:5000 --env-file .env chat-realtime
 ```
 
-## 🎉 Estado Actual
+##  Estado Actual
 
-- ✅ Código actualizado con variables de entorno
-- ✅ Dependencias documentadas
-- ✅ Docker configurado
-- ✅ Git configurado
-- ✅ Documentación completa
-- ⏳ Pendiente: Instalar dependencias localmente
-- ⏳ Pendiente: Subir a GitHub
-- ⏳ Pendiente: Deploy en Render
+-  Código actualizado con variables de entorno
+- Dependencias documentadas
+-  Docker configurado
+- git configurado
+-  Documentación completa
+-  Pendiente: Instalar dependencias localmente
+-  Pendiente: Subir a GitHub
+-  Pendiente: Deploy en Render
 
-## 💡 Notas
+##  Notas
 
 - El archivo `.env` contiene tus credenciales reales (NO se sube a Git)
 - El archivo `.env.example` es la plantilla (SÍ se sube a Git)
 - Render asignará automáticamente el puerto en producción
 - El plan Free de Render tiene limitaciones pero es suficiente para empezar
 
-## 🆘 Ayuda
+##  Ayuda
 
 Si tienes problemas:
 1. Revisa `PASOS_DEPLOY.md` para guía detallada

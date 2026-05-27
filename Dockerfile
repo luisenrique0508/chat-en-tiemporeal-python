@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar el código de la aplicación
 COPY chattelegram.py .
+COPY templates/ ./templates/
 
 # Exponer el puerto
 EXPOSE 5000

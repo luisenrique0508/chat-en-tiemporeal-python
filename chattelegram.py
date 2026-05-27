@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_socketio import SocketIO, send
 from telegram import Update
 from telegram.ext import (
@@ -10,7 +10,6 @@ from telegram.ext import (
 
 import threading
 import requests
-import eventlet
 import os
 from dotenv import load_dotenv
 
@@ -21,9 +20,6 @@ load_dotenv()
 
 tokenTelegram = os.getenv("TELEGRAM_TOKEN")
 chatID = os.getenv("TELEGRAM_CHAT_ID")
-
-
-eventlet.monkey_patch()
 
 
 # CREAR APP
@@ -37,7 +33,8 @@ app = Flask(__name__)
 
 socket = SocketIO(
     app,
-    cors_allowed_origins="*"
+    cors_allowed_origins="*",
+    async_mode='threading'
 )
 
 
@@ -54,298 +51,7 @@ botTelegram = ApplicationBuilder().token(
 
 @app.route("/")
 def index():
-
-    return """
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>Chat Tiempo Real</title>
-
-<style>
-
-body{
-    font-family:Arial;
-    background:#f2f2f2;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
-}
-
-.chat-container{
-    width:95%;
-    max-width:450px;
-    background:white;
-    border-radius:10px;
-    overflow:hidden;
-    box-shadow:0 0 10px rgba(0,0,0,0.2);
-}
-
-.chat-header{
-    background:#007bff;
-    color:white;
-    padding:15px;
-    text-align:center;
-    font-size:20px;
-    font-weight:bold;
-}
-
-#chat{
-    height:400px;
-    overflow-y:auto;
-    padding:10px;
-    background:#fafafa;
-}
-
-.mensaje{
-    background:#e4e6eb;
-    padding:10px;
-    border-radius:10px;
-    margin-bottom:10px;
-    word-wrap:break-word;
-}
-
-.controls{
-    padding:10px;
-    border-top:1px solid #ddd;
-}
-
-.input-group{
-    display:flex;
-    gap:10px;
-    margin-bottom:10px;
-}
-
-input{
-    flex:1;
-    padding:10px;
-    border:1px solid #ccc;
-    border-radius:5px;
-}
-
-button{
-    padding:10px 15px;
-    border:none;
-    background:#007bff;
-    color:white;
-    border-radius:5px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#0056b3;
-}
-
-#btn-entrar{
-    background:#28a745;
-}
-
-#btn-entrar:hover{
-    background:#1e7e34;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="chat-container">
-
-    <div class="chat-header">
-        Chat Tiempo Real
-    </div>
-
-    <div id="chat"></div>
-
-    <div class="controls">
-
-        <div class="input-group">
-
-            <input
-                type="text"
-                id="nombre"
-                placeholder="Tu nombre"
-            >
-
-            <button
-                id="btn-entrar"
-                onclick="guardarNombre()"
-            >
-                Entrar
-            </button>
-
-        </div>
-
-        <div class="input-group">
-
-            <input
-                type="text"
-                id="mensaje"
-                placeholder="Escribe un mensaje"
-            >
-
-            <button onclick="enviar()">
-                Enviar
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-
-<script>
-
-var socket = io();
-
-var nombre = "";
-
-
-// GUARDAR NOMBRE
-
-
-function guardarNombre(){
-
-    let input = document.getElementById("nombre");
-
-    if(input.value.trim() == ""){
-
-        alert("Ingrese su nombre");
-
-        return;
-    }
-
-    nombre = input.value;
-
-    input.disabled = true;
-
-    document.getElementById(
-        "btn-entrar"
-    ).disabled = true;
-
-    agregarMensaje(
-        "Sistema",
-        nombre + " se unió al chat"
-    );
-}
-
-// =====================================
-// ENVIAR MENSAJE
-// =====================================
-
-function enviar(){
-
-    let mensajeInput =
-        document.getElementById("mensaje");
-
-    let mensaje = mensajeInput.value;
-
-    if(nombre == ""){
-
-        alert("Debe ingresar su nombre");
-
-        return;
-    }
-
-    if(mensaje.trim() == ""){
-
-        return;
-    }
-
-    socket.send(
-        nombre + ": " + mensaje
-    );
-
-    mensajeInput.value = "";
-}
-
-// =====================================
-// MENSAJES NORMALES
-// =====================================
-
-socket.on("message", function(msg){
-
-    agregarChat(msg);
-});
-
-// =====================================
-// MENSAJES DESDE TELEGRAM
-// =====================================
-
-socket.on("telegram_message", function(msg){
-
-    agregarChat("Telegram: " + msg);
-});
-
-// =====================================
-// AGREGAR MENSAJES
-// =====================================
-
-function agregarChat(msg){
-
-    let chat = document.getElementById("chat");
-
-    let div = document.createElement("div");
-
-    div.className = "mensaje";
-
-    if(msg.includes(":")){
-
-        let partes = msg.split(":");
-
-        div.innerHTML =
-            "<strong>" +
-            partes[0] +
-            ":</strong> " +
-            partes.slice(1).join(":");
-
-    }else{
-
-        div.innerText = msg;
-    }
-
-    chat.appendChild(div);
-
-    chat.scrollTop = chat.scrollHeight;
-}
-
-// =====================================
-// MENSAJE LOCAL
-// =====================================
-
-function agregarMensaje(usuario, texto){
-
-    let chat = document.getElementById("chat");
-
-    let div = document.createElement("div");
-
-    div.className = "mensaje";
-
-    div.innerHTML =
-        "<strong>" +
-        usuario +
-        ":</strong> " +
-        texto;
-
-    chat.appendChild(div);
-}
-
-</script>
-
-</body>
-</html>
-"""
+    return render_template('index.html')
 
 # MENSAJES DESDE WEB
 
@@ -416,9 +122,13 @@ async def recibirTelegram(
 
 
 def iniciarBot():
-
+    import asyncio
+    
+    # Crear un nuevo event loop para este thread
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    
     botTelegram.add_handler(
-
         MessageHandler(
             filters.TEXT & ~filters.COMMAND,
             recibirTelegram
@@ -427,7 +137,21 @@ def iniciarBot():
 
     print("BOT TELEGRAM ACTIVO")
 
-    botTelegram.run_polling()
+    # Ejecutar el bot en el event loop
+    loop.run_until_complete(botTelegram.initialize())
+    loop.run_until_complete(botTelegram.start())
+    loop.run_until_complete(botTelegram.updater.start_polling())
+    
+    # Mantener el loop corriendo
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        loop.run_until_complete(botTelegram.updater.stop())
+        loop.run_until_complete(botTelegram.stop())
+        loop.run_until_complete(botTelegram.shutdown())
+        loop.close()
 
 
 # MAIN
@@ -443,7 +167,7 @@ if __name__ == "__main__":
 
     print("Servidor iniciado")
 
-    port = int(os.getenv("PORT", 5000))
+    port = int(os.getenv("PORT", 8080))
     host = os.getenv("HOST", "0.0.0.0")
 
     socket.run(

@@ -2,14 +2,14 @@
 
 ## 1️⃣ Instalar (2 min)
 
-```bash
+```sh
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
 ## 2️⃣ Probar (1 min)
 
-```bash
+```sh
 python chattelegram.py
 ```
 
@@ -17,7 +17,7 @@ Abre: http://localhost:5000
 
 ## 3️⃣ Subir a GitHub (1 min)
 
-```bash
+```sh
 git commit -m "Initial commit: Chat en tiempo real"
 git remote add origin https://github.com/TU_USUARIO/TU_REPO.git
 git push -u origin main
@@ -36,10 +36,6 @@ git push -u origin main
    ```
 6. Create Web Service
 
-## ✅ ¡Listo!
+##  ¡Listo!
 
 Tu chat estará en: `https://tu-app.onrender.com`
-
----
-
-📖 **Más detalles:** Lee `COMANDOS.md` o `PASOS_DEPLOY.md`

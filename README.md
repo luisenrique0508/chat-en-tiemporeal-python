@@ -2,46 +2,51 @@
 
 Chat en tiempo real que integra Flask-SocketIO con Telegram Bot, permitiendo comunicación bidireccional entre usuarios web y Telegram.
 
-## 🚀 Características
+##  Características
 
 - Chat web en tiempo real usando WebSockets
 - Integración con Telegram Bot
 - Mensajes bidireccionales (Web ↔ Telegram)
 - Interfaz responsive y moderna
 
-## 📋 Requisitos
+##  Requisitos
 
 - Python 3.11+
 - Token de Bot de Telegram
 - Chat ID de Telegram
 
-## 🔧 Instalación Local
+##  Instalación Local
 
 1. **Clonar el repositorio**
-```bash
+
+```sh
 git clone <tu-repositorio>
 cd chatrealtime
 ```
 
 2. **Crear entorno virtual**
-```bash
+
+```sh
 python -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
 ```
 
 3. **Instalar dependencias**
-```bash
+
+```sh
 pip install -r requirements.txt
 ```
 
 4. **Configurar variables de entorno**
-```bash
+
+```sh
 cp .env.example .env
 # Editar .env con tus credenciales
 ```
 
 5. **Ejecutar la aplicación**
-```bash
+
+```sh
 python chattelegram.py
 ```
 
@@ -50,12 +55,14 @@ La aplicación estará disponible en `http://localhost:5000`
 ## 🐳 Docker
 
 **Construir la imagen:**
-```bash
+
+```sh
 docker build -t chat-realtime .
 ```
 
 **Ejecutar el contenedor:**
-```bash
+
+```sh
 docker run -p 5000:5000 \
   -e TELEGRAM_TOKEN=tu_token \
   -e TELEGRAM_CHAT_ID=tu_chat_id \
