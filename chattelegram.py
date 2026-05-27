@@ -124,34 +124,38 @@ async def recibirTelegram(
 def iniciarBot():
     import asyncio
     
-    # Crear un nuevo event loop para este thread
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    
-    botTelegram.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            recibirTelegram
-        )
-    )
-
-    print("BOT TELEGRAM ACTIVO")
-
-    # Ejecutar el bot en el event loop
-    loop.run_until_complete(botTelegram.initialize())
-    loop.run_until_complete(botTelegram.start())
-    loop.run_until_complete(botTelegram.updater.start_polling())
-    
-    # Mantener el loop corriendo
     try:
+        # Crear un nuevo event loop para este thread
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        botTelegram.add_handler(
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                recibirTelegram
+            )
+        )
+
+        print("BOT TELEGRAM ACTIVO")
+
+        # Ejecutar el bot en el event loop
+        loop.run_until_complete(botTelegram.initialize())
+        loop.run_until_complete(botTelegram.start())
+        loop.run_until_complete(botTelegram.updater.start_polling())
+        
+        # Mantener el loop corriendo
         loop.run_forever()
-    except KeyboardInterrupt:
-        pass
+    except Exception as e:
+        print(f"Error en bot de Telegram: {e}")
     finally:
-        loop.run_until_complete(botTelegram.updater.stop())
-        loop.run_until_complete(botTelegram.stop())
-        loop.run_until_complete(botTelegram.shutdown())
-        loop.close()
+        try:
+            if loop and not loop.is_closed():
+                loop.run_until_complete(botTelegram.updater.stop())
+                loop.run_until_complete(botTelegram.stop())
+                loop.run_until_complete(botTelegram.shutdown())
+                loop.close()
+        except:
+            pass
 
 
 # MAIN
@@ -160,7 +164,8 @@ def iniciarBot():
 if __name__ == "__main__":
 
     hiloBot = threading.Thread(
-        target=iniciarBot
+        target=iniciarBot,
+        daemon=True
     )
 
     hiloBot.start()
@@ -173,5 +178,6 @@ if __name__ == "__main__":
     socket.run(
         app,
         host=host,
-        port=port
+        port=port,
+        allow_unsafe_werkzeug=True
     )
