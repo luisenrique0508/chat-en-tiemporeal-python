@@ -14,8 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY chattelegram.py .
 COPY templates/ ./templates/
 
-# Exponer el puerto
-EXPOSE 5000
+# Render usa puerto 10000 por defecto
+EXPOSE 10000
 
 # Comando para ejecutar la aplicación
 CMD ["python", "chattelegram.py"]

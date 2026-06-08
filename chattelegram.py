@@ -4,6 +4,7 @@ from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
     MessageHandler,
+    CommandHandler,
     filters,
     ContextTypes
 )
@@ -11,6 +12,7 @@ from telegram.ext import (
 import threading
 import requests
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
@@ -46,12 +48,32 @@ botTelegram = ApplicationBuilder().token(
 ).build()
 
 
+# Contador de usuarios web conectados
+usuarios_web = 0
+
+
 # PAGINA PRINCIPAL
 
 
 @app.route("/")
 def index():
     return render_template('index.html')
+
+
+# Rastrear conexiones web
+@socket.on("connect")
+def handle_connect():
+    global usuarios_web
+    usuarios_web += 1
+    print(f"Usuario web conectado. Total: {usuarios_web}")
+
+
+@socket.on("disconnect")
+def handle_disconnect():
+    global usuarios_web
+    usuarios_web = max(0, usuarios_web - 1)
+    print(f"Usuario web desconectado. Total: {usuarios_web}")
+
 
 # MENSAJES DESDE WEB
 
@@ -83,7 +105,7 @@ def enviarTelegram(mensaje):
 
     data = {
         "chat_id": chatID,
-        "text": f"{mensaje}"
+        "text": f"💬 {mensaje}"
     }
 
     try:
@@ -95,7 +117,110 @@ def enviarTelegram(mensaje):
         print("Error Telegram:", e)
 
 
-# RECIBIR DESDE TELEGRAM
+# =============================================
+# COMANDOS DE TELEGRAM
+# =============================================
+
+
+# /start - Saludo inicial del bot
+async def comandoStart(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+    await update.message.reply_text(
+        "🤖 ¡Hola! Soy el Bot del Chat en Tiempo Real.\n\n"
+        "Estoy conectado y sincronizando mensajes "
+        "entre Telegram y la Web.\n\n"
+        "Escribe /ayuda para ver los comandos."
+    )
+
+
+# /ayuda - Lista de comandos disponibles
+async def comandoAyuda(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+    await update.message.reply_text(
+        "📋 *Comandos Disponibles:*\n\n"
+        "🟢 /start - Iniciar el bot\n"
+        "❓ /ayuda - Ver esta ayuda\n"
+        "📡 /estado - Ver estado del servidor\n"
+        "📢 /anunciar [mensaje] - Enviar anuncio a la Web\n"
+        "👥 /usuarios - Ver usuarios web conectados\n"
+        "🏓 /ping - Verificar que el bot responde",
+        parse_mode="Markdown"
+    )
+
+
+# /estado - Estado del servidor y bot
+async def comandoEstado(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+    ahora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    host = os.getenv("RENDER_EXTERNAL_URL", "localhost")
+
+    await update.message.reply_text(
+        f"📡 *Estado del Servidor*\n\n"
+        f"🟢 Bot: Activo\n"
+        f"🟢 Servidor Web: Activo\n"
+        f"🌐 URL: {host}\n"
+        f"👥 Usuarios web: {usuarios_web}\n"
+        f"🕐 Hora servidor: {ahora}",
+        parse_mode="Markdown"
+    )
+
+
+# /ping - Respuesta rápida para verificar conexión
+async def comandoPing(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+    await update.message.reply_text(
+        "🏓 ¡Pong! El bot está vivo y funcionando."
+    )
+
+
+# /usuarios - Cuántos hay conectados en la web
+async def comandoUsuarios(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+    await update.message.reply_text(
+        f"👥 Usuarios conectados en la web: {usuarios_web}"
+    )
+
+
+# /anunciar - Enviar anuncio a la interfaz web
+async def comandoAnunciar(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+    mensaje = " ".join(context.args)
+
+    if not mensaje:
+        await update.message.reply_text(
+            "⚠️ Uso correcto: /anunciar [tu mensaje]\n"
+            "Ejemplo: /anunciar ¡Reunión a las 8pm!"
+        )
+        return
+
+    texto_anuncio = f"📢 ANUNCIO: {mensaje}"
+
+    # Emitir a la interfaz web
+    socket.emit(
+        "telegram_message",
+        f"Sistema: {texto_anuncio}"
+    )
+
+    await update.message.reply_text(
+        f"✅ Anuncio enviado a la web:\n{texto_anuncio}"
+    )
+
+
+# =============================================
+# RECIBIR MENSAJES NORMALES DESDE TELEGRAM
+# =============================================
 
 
 async def recibirTelegram(
@@ -123,12 +248,33 @@ async def recibirTelegram(
 
 def iniciarBot():
     import asyncio
-    
+
     try:
         # Crear un nuevo event loop para este thread
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
+
+        # Registrar comandos PRIMERO
+        botTelegram.add_handler(
+            CommandHandler("start", comandoStart)
+        )
+        botTelegram.add_handler(
+            CommandHandler("ayuda", comandoAyuda)
+        )
+        botTelegram.add_handler(
+            CommandHandler("estado", comandoEstado)
+        )
+        botTelegram.add_handler(
+            CommandHandler("ping", comandoPing)
+        )
+        botTelegram.add_handler(
+            CommandHandler("usuarios", comandoUsuarios)
+        )
+        botTelegram.add_handler(
+            CommandHandler("anunciar", comandoAnunciar)
+        )
+
+        # Mensajes de texto normales (después de comandos)
         botTelegram.add_handler(
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -141,8 +287,10 @@ def iniciarBot():
         # Ejecutar el bot en el event loop
         loop.run_until_complete(botTelegram.initialize())
         loop.run_until_complete(botTelegram.start())
-        loop.run_until_complete(botTelegram.updater.start_polling())
-        
+        loop.run_until_complete(
+            botTelegram.updater.start_polling()
+        )
+
         # Mantener el loop corriendo
         loop.run_forever()
     except Exception as e:
@@ -150,9 +298,13 @@ def iniciarBot():
     finally:
         try:
             if loop and not loop.is_closed():
-                loop.run_until_complete(botTelegram.updater.stop())
+                loop.run_until_complete(
+                    botTelegram.updater.stop()
+                )
                 loop.run_until_complete(botTelegram.stop())
-                loop.run_until_complete(botTelegram.shutdown())
+                loop.run_until_complete(
+                    botTelegram.shutdown()
+                )
                 loop.close()
         except:
             pass
