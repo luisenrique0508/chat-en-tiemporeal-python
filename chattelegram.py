@@ -186,7 +186,7 @@ async def comandoStart(
     context: ContextTypes.DEFAULT_TYPE
 ):
     await update.message.reply_text(
-        "🤖 ¡Hola! Soy el Bot del Chat en Tiempo Real.\n\n"
+        " ¡Hola! Soy el Bot del Chat en Tiempo Real.\n\n"
         "Estoy conectado y sincronizando mensajes "
         "entre Telegram y la Web.\n\n"
         "Escribe /ayuda para ver los comandos."
