@@ -646,7 +646,22 @@
                     autocomplete="off"
                     required
                 >
-                <label for="nombre">Tu nombre de usuario</label>
+                <label for="nombre">Tu nombre</label>
+            </div>
+            
+            <div class="m3-textfield" style="margin-top: 16px;">
+                <input type="text" id="apellido" placeholder=" " autocomplete="off" required>
+                <label for="apellido">Tu apellido</label>
+            </div>
+            
+            <div class="m3-textfield" style="margin-top: 16px;">
+                <input type="text" id="placa" placeholder=" " autocomplete="off" required>
+                <label for="placa">Placa de auto</label>
+            </div>
+            
+            <div class="m3-textfield" style="margin-top: 16px;">
+                <input type="text" id="modelo" placeholder=" " autocomplete="off" required>
+                <label for="modelo">Modelo de auto</label>
             </div>
             
             <button
@@ -743,12 +758,13 @@
             
             // Cargar nombre si ya existe
             const savedName = localStorage.getItem('nombre');
+            const savedInfo = localStorage.getItem('infoTaxi') || "";
             if (savedName) {
                 nombre = savedName;
                 modal.close();
                 actualizarHeaderAvatar();
                 mostrarSnackbar("Sesión restaurada: ¡Hola de nuevo, " + nombre + "!");
-                socket.send(nombre + " se ha reconectado");
+                socket.send(nombre + savedInfo + " se ha reconectado");
             } else {
                 if (typeof modal.showModal === 'function') {
                     modal.showModal();
@@ -878,17 +894,26 @@
         // ACCIONES DE REGISTRO & ENVÍO
         // =====================================
         function guardarNombre() {
-            let input = document.getElementById("nombre");
-            let val = input.value.trim();
+            let inputNombre = document.getElementById("nombre");
+            let inputApellido = document.getElementById("apellido");
+            let inputPlaca = document.getElementById("placa");
+            let inputModelo = document.getElementById("modelo");
             
-            if (val == "") {
-                mostrarSnackbar("Por favor, ingresa tu nombre", "warning");
-                input.focus();
+            let valNombre = inputNombre.value.trim();
+            let valApellido = inputApellido.value.trim();
+            let valPlaca = inputPlaca.value.trim();
+            let valModelo = inputModelo.value.trim();
+            
+            if (valNombre == "" || valApellido == "" || valPlaca == "" || valModelo == "") {
+                mostrarSnackbar("Por favor, completa todos los campos", "warning");
                 return;
             }
             
-            nombre = val;
+            nombre = valNombre + " " + valApellido;
+            let infoTaxi = " (Placa: " + valPlaca + ", Modelo: " + valModelo + ")";
+            
             localStorage.setItem('nombre', nombre);
+            localStorage.setItem('infoTaxi', infoTaxi);
             
             const modal = document.getElementById("welcomeModal");
             if (typeof modal.close === 'function') {
@@ -898,7 +923,7 @@
             }
             
             actualizarHeaderAvatar();
-            socket.send(nombre + " se ha unido al chat");
+            socket.send(nombre + infoTaxi + " se ha unido al chat");
             mostrarSnackbar("¡Bienvenido, " + nombre + "!");
             document.getElementById("mensaje").focus();
         }

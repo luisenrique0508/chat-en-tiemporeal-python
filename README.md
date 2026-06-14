@@ -69,7 +69,7 @@ docker run -p 5000:5000 \
   chat-realtime
 ```
 
-## 🌐 Deploy en Render
+##  Deploy en Render
 
 1. Crear cuenta en [Render](https://render.com)
 2. Conectar tu repositorio de GitHub
@@ -82,7 +82,7 @@ docker run -p 5000:5000 \
    - `TELEGRAM_CHAT_ID`
    - `PORT` (Render lo asigna automáticamente)
 
-## 📝 Variables de Entorno
+##  Variables de Entorno
 
 | Variable | Descripción |
 |----------|-------------|
@@ -91,7 +91,7 @@ docker run -p 5000:5000 \
 | `PORT` | Puerto del servidor (default: 5000) |
 | `HOST` | Host del servidor (default: 0.0.0.0) |
 
-## 🤖 Configurar Bot de Telegram
+##  Configurar Bot de Telegram
 
 1. Hablar con [@BotFather](https://t.me/botfather) en Telegram
 2. Crear un nuevo bot con `/newbot`
@@ -101,6 +101,6 @@ docker run -p 5000:5000 \
    https://api.telegram.org/bot<TU_TOKEN>/getUpdates
    ```
 
-## 📄 Licencia
+##  Licencia
 
 MIT

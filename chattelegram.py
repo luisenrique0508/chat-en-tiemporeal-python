@@ -92,6 +92,64 @@ def recibirMensaje(mensaje):
         args=(mensaje,)
     ).start()
 
+    # Procesar comandos del bot si vienen de la web
+    partes = mensaje.split(": ", 1)
+    if len(partes) == 2 and partes[1].startswith("/"):
+        comando = partes[1].split()[0]
+        respuesta_bot = None
+        
+        if comando == "/start":
+            respuesta_bot = (
+                "🤖 ¡Hola! Soy el Bot del Chat en Tiempo Real.\n\n"
+                "Estoy conectado y sincronizando mensajes entre Telegram y la Web.\n\n"
+                "Escribe /ayuda para ver los comandos."
+            )
+        elif comando == "/ayuda":
+            respuesta_bot = (
+                "📋 *Comandos Disponibles:*\n\n"
+                "🟢 /start - Iniciar el bot\n"
+                "❓ /ayuda - Ver esta ayuda\n"
+                "📡 /estado - Ver estado del servidor\n"
+                "📢 /anunciar [mensaje] - Enviar anuncio a la Web\n"
+                "👥 /usuarios - Ver usuarios web conectados\n"
+                "🏓 /ping - Verificar que el bot responde"
+            )
+        elif comando == "/estado":
+            ahora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            host = os.getenv("RENDER_EXTERNAL_URL", "localhost")
+            respuesta_bot = (
+                f"📡 *Estado del Servidor*\n\n"
+                f"🟢 Bot: Activo\n"
+                f"🟢 Servidor Web: Activo\n"
+                f"🌐 URL: {host}\n"
+                f"👥 Usuarios web: {usuarios_web}\n"
+                f"🕐 Hora servidor: {ahora}"
+            )
+        elif comando == "/ping":
+            respuesta_bot = "🏓 ¡Pong! El bot está vivo y funcionando."
+        elif comando == "/usuarios":
+            respuesta_bot = f"👥 Usuarios conectados en la web: {usuarios_web}"
+        elif comando == "/anunciar":
+            anuncio = partes[1].replace("/anunciar", "").strip()
+            if not anuncio:
+                respuesta_bot = "⚠️ Uso correcto: /anunciar [tu mensaje]\nEjemplo: /anunciar ¡Reunión a las 8pm!"
+            else:
+                texto_anuncio = f"📢 ANUNCIO: {anuncio}"
+                # Emitir a la interfaz web (esto ya se hace como Sistema)
+                socket.emit("telegram_message", f"Sistema: {texto_anuncio}")
+                respuesta_bot = f"✅ Anuncio enviado a la web:\n{texto_anuncio}"
+
+        if respuesta_bot:
+            texto_sistema = f"Sistema: {respuesta_bot}"
+            # Emitir a la web
+            socket.emit("telegram_message", texto_sistema)
+            # Enviar a Telegram para que también se vea la respuesta del bot ahí
+            threading.Thread(
+                target=enviarTelegram,
+                args=(texto_sistema,)
+            ).start()
+
+
 
 # ENVIAR A TELEGRAM
 
