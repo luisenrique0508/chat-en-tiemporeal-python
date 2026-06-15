@@ -52,6 +52,14 @@ botTelegram = ApplicationBuilder().token(
 usuarios_web = 0
 
 
+@app.after_request
+def add_security_headers(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
+
 # PAGINA PRINCIPAL
 
 
