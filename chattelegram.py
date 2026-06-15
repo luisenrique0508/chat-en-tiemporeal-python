@@ -175,12 +175,15 @@ def enviarTelegram(mensaje):
     }
 
     try:
-
-        requests.post(url, data=data)
-
+        res = requests.post(url, data=data)
+        if res.status_code != 200:
+            print("========================================")
+            print("🚨 ERROR AL ENVIAR A TELEGRAM 🚨")
+            print(f"Status Code: {res.status_code}")
+            print(f"Respuesta de Telegram: {res.text}")
+            print("========================================")
     except Exception as e:
-
-        print("Error Telegram:", e)
+        print("Excepción al intentar enviar a Telegram:", e)
 
 
 # =============================================

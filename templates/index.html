@@ -249,6 +249,60 @@
             border-radius: 3px;
         }
 
+        /* Quick Actions para Taxistas */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: var(--md-sys-color-surface-container);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            overflow-x: auto;
+            scrollbar-width: none; /* Ocultar scroll en móviles */
+        }
+        
+        .quick-actions::-webkit-scrollbar {
+            display: none;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .action-btn .material-symbols-rounded {
+            font-size: 18px;
+        }
+
+        .sos-btn {
+            background-color: var(--md-sys-color-error);
+            color: var(--md-sys-color-on-error);
+        }
+        
+        .free-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .busy-btn {
+            background-color: #FF9800;
+            color: white;
+        }
+
+
         /* ===================================== */
         /* MESSENGER BUBBLES & GROUPING */
         /* ===================================== */
@@ -415,7 +469,7 @@
             background: transparent;
             color: var(--md-sys-color-on-surface);
             font-family: inherit;
-            font-size: 15px;
+            font-size: 16px; /* 16px evita zoom automático en iOS */
             outline: none;
         }
 
@@ -479,6 +533,15 @@
             border: 1px solid var(--md-sys-color-outline-variant);
             max-height: 90vh;
             overflow-y: auto;
+        }
+        
+        @media (max-width: 480px) {
+            .welcome-card {
+                padding: 24px 16px;
+            }
+            .chat-footer {
+                padding: 8px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -716,6 +779,22 @@
             </div>
         </header>
         
+        <!-- Quick Actions Taxi -->
+        <div class="quick-actions">
+            <button class="action-btn sos-btn" onclick="enviarSOS()" title="¡Emergencia S.O.S!">
+                <span class="material-symbols-rounded">e911_emergency</span>
+                <span>S.O.S</span>
+            </button>
+            <button class="action-btn free-btn" onclick="reportarEstado('LIBRE')" title="Estoy Libre">
+                <span class="material-symbols-rounded">check_circle</span>
+                <span>Libre</span>
+            </button>
+            <button class="action-btn busy-btn" onclick="reportarEstado('OCUPADO')" title="Estoy Ocupado">
+                <span class="material-symbols-rounded">do_not_disturb_on</span>
+                <span>Ocupado</span>
+            </button>
+        </div>
+        
         <!-- Feed de Mensajes -->
         <div class="chat-feed" id="chat">
             <!-- Los mensajes se agregan aquí dinámicamente -->
@@ -749,13 +828,13 @@
     </div>
     
     <!-- Socket.IO -->
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" defer></script>
     
     <script>
         // =====================================
         // ESTADO GLOBAL
         // =====================================
-        var socket = io();
+        var socket;
         var nombre = "";
         var mensajesHistorial = [];
         
@@ -763,6 +842,17 @@
         // INICIALIZACIÓN
         // =====================================
         document.addEventListener('DOMContentLoaded', function() {
+            socket = io();
+            
+            // Inicializar Listeners de Socket.io
+            socket.on("message", function(msg) {
+                agregarAlHistorial(msg, false);
+            });
+            
+            socket.on("telegram_message", function(msg) {
+                agregarAlHistorial(msg, true);
+            });
+            
             // Cargar tema guardado
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -993,16 +1083,54 @@
             }
         }
         
+        function reportarEstado(estado) {
+            if (nombre === "") {
+                mostrarSnackbar("Debes ingresar tu nombre primero", "warning");
+                return;
+            }
+            let infoTaxi = localStorage.getItem('infoTaxi') || "";
+            let textoAnuncio = `${nombre}${infoTaxi} reporta estado: ${estado === 'LIBRE' ? '🟢 LIBRE (Buscando pasajeros)' : '🔴 OCUPADO (En viaje)'}`;
+            
+            socket.send(nombre + ": /anunciar " + textoAnuncio);
+            mostrarSnackbar(`Has reportado que estás ${estado}`, "success");
+        }
+
+        function enviarSOS() {
+            if (nombre === "") {
+                mostrarSnackbar("Debes ingresar tu nombre primero", "warning");
+                return;
+            }
+            
+            if (confirm("🚨 ¿Estás seguro de enviar una alerta S.O.S a toda la central?")) {
+                if ("geolocation" in navigator) {
+                    mostrarSnackbar("Enviando S.O.S con GPS...", "error");
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                        
+                        let infoTaxi = localStorage.getItem('infoTaxi') || "";
+                        let textoAnuncio = `🚨 ¡ALERTA S.O.S! ${nombre}${infoTaxi} requiere ASISTENCIA INMEDIATA en: ${mapsLink}`;
+                        
+                        socket.send(nombre + ": /anunciar " + textoAnuncio);
+                        mostrarSnackbar("¡Alerta S.O.S enviada con GPS!", "error");
+                    }, function(error) {
+                        let infoTaxi = localStorage.getItem('infoTaxi') || "";
+                        let textoAnuncio = `🚨 ¡ALERTA S.O.S! ${nombre}${infoTaxi} requiere ASISTENCIA INMEDIATA (GPS no disponible).`;
+                        socket.send(nombre + ": /anunciar " + textoAnuncio);
+                        mostrarSnackbar("¡Alerta S.O.S enviada sin GPS!", "error");
+                    });
+                } else {
+                    let infoTaxi = localStorage.getItem('infoTaxi') || "";
+                    let textoAnuncio = `🚨 ¡ALERTA S.O.S! ${nombre}${infoTaxi} requiere ASISTENCIA INMEDIATA.`;
+                    socket.send(nombre + ": /anunciar " + textoAnuncio);
+                    mostrarSnackbar("¡Alerta S.O.S enviada!", "error");
+                }
+            }
+        }
         // =====================================
-        // RECIBIR MENSAJES SOCKET.IO
+        // RECIBIR MENSAJES SOCKET.IO (Movido a DOMContentLoaded)
         // =====================================
-        socket.on("message", function(msg) {
-            agregarAlHistorial(msg, false);
-        });
-        
-        socket.on("telegram_message", function(msg) {
-            agregarAlHistorial(msg, true);
-        });
         
         function agregarAlHistorial(msg, esTelegram) {
             let sender = "Sistema";
