@@ -726,6 +726,10 @@
         
         <!-- Controles -->
         <footer class="chat-footer">
+            <button class="icon-btn" onclick="anunciarUbicacion()" title="Anunciar Ubicación" style="margin-right: 4px; background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+                <span class="material-symbols-rounded">location_on</span>
+            </button>
+            
             <div class="input-wrapper">
                 <input
                     type="text"
@@ -957,6 +961,39 @@
             socket.send(nombre + ": " + mensaje);
             mensajeInput.value = "";
             mensajeInput.focus();
+        }
+
+        function anunciarUbicacion() {
+            if (nombre === "") {
+                mostrarSnackbar("Debes ingresar tu nombre primero", "warning");
+                return;
+            }
+            
+            if ("geolocation" in navigator) {
+                mostrarSnackbar("Obteniendo tu ubicación GPS...", "info");
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                    
+                    let infoTaxi = localStorage.getItem('infoTaxi') || "";
+                    let textoAnuncio = `${nombre}${infoTaxi} está libre y anunció su ubicación: ${mapsLink}`;
+                    
+                    socket.send(nombre + ": /anunciar " + textoAnuncio);
+                    mostrarSnackbar("Ubicación GPS enviada a la central y Telegram", "success");
+                }, function(error) {
+                    // Fallback a texto si el usuario deniega el permiso GPS
+                    let ubicacion = prompt("📍 No pudimos obtener tu GPS. Escribe dónde te encuentras:\nEjemplo: 'Plaza Principal', etc.");
+                    if (ubicacion && ubicacion.trim() !== "") {
+                        let infoTaxi = localStorage.getItem('infoTaxi') || "";
+                        let textoAnuncio = `${nombre}${infoTaxi} se encuentra disponible en: ${ubicacion.trim()}`;
+                        socket.send(nombre + ": /anunciar " + textoAnuncio);
+                        mostrarSnackbar("Ubicación enviada correctamente", "success");
+                    }
+                });
+            } else {
+                mostrarSnackbar("Tu navegador no soporta GPS.", "error");
+            }
         }
         
         // =====================================
