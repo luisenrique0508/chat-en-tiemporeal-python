@@ -1,4 +1,4 @@
-# Chat en Tiempo Real con Telegram
+# Chat en Tiempo Real con Telegram Proyecto UDABOL-PRG-Avanzada-2026
 
 Chat en tiempo real que integra Flask-SocketIO con Telegram Bot, permitiendo comunicación bidireccional entre usuarios web y Telegram.
 
@@ -17,27 +17,27 @@ Chat en tiempo real que integra Flask-SocketIO con Telegram Bot, permitiendo com
 
 ##  Instalación Local
 
-1. **Clonar el repositorio**
+1. **Clonar el repositorio Duu **
 
 ```sh
 git clone <tu-repositorio>
 cd chatrealtime
 ```
 
-2. **Crear entorno virtual**
+2. **Crear entorno virtual en tu entorno**
 
 ```sh
 python -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
 ```
 
-3. **Instalar dependencias**
+3. **Instalar dependencias de .pyy**
 
 ```sh
 pip install -r requirements.txt
 ```
 
-4. **Configurar variables de entorno**
+4. **Configurar variables de entorno los Enviromentssss**
 
 ```sh
 cp .env.example .env
@@ -52,7 +52,7 @@ python chattelegram.py
 
 La aplicación estará disponible en `http://localhost:5000`
 
-## 🐳 Docker
+## 🐳 Docker tambien lo puedes levantar con Docker
 
 **Construir la imagen:**
 
